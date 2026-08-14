@@ -1,0 +1,7 @@
+{
+  "name": "stewards-anonymous-survey",
+  "private": true,
+  "dependencies": {
+    "@netlify/blobs": "^8.2.0"
+  }
+}

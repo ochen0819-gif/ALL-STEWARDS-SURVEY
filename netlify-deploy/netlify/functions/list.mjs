@@ -4,10 +4,12 @@ export default async (req) => {
   if (req.method !== "POST") return new Response("Method Not Allowed", { status: 405 });
   let body;
   try { body = await req.json(); } catch { return new Response("Bad Request", { status: 400 }); }
-  // 管理员账号在服务端校验；可在 Netlify 环境变量 ADMIN_USER / ADMIN_PASS 中修改
-  const USER = process.env.ADMIN_USER || "admin";
-  const PASS = process.env.ADMIN_PASS || "stewards2026";
-  if (!body || body.user !== USER || body.pass !== PASS) return new Response("Unauthorized", { status: 401 });
+  // 固定管理员账号（不再读取环境变量）
+  const USER = "BOSS";
+  const PASS = "20262026";
+  const u = body && typeof body.user === "string" ? body.user.trim() : "";
+  const p = body && typeof body.pass === "string" ? body.pass.trim() : "";
+  if (u !== USER || p !== PASS) return new Response("Unauthorized", { status: 401 });
 
   const store = getStore({ name: "survey-submissions", consistency: "strong" });
   const records = [];

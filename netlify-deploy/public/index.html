@@ -521,6 +521,36 @@ let state = {
   adminCreds:null,
 };
 
+var QBY_ID = null;
+function qById(id){
+  if(!QBY_ID){ QBY_ID = {}; try{ ALL_QUESTIONS.forEach(function(q){ QBY_ID[q.id]=q; }); }catch(e){} }
+  return QBY_ID[id];
+}
+function setAnswerQuiet(qid, val){ state.answers[qid] = val; refreshNav(); }
+function setNoteQuiet(qid, val){ state.answers[qid+'__note'] = val; refreshNav(); }
+function flushInput(){ render(); }
+function refreshNav(){
+  var ok = true, nodes = document.querySelectorAll('.q[data-qid]');
+  for(var i=0;i<nodes.length;i++){
+    var q = qById(nodes[i].getAttribute('data-qid'));
+    if(q && !isAnswered(q)){ ok = false; break; }
+  }
+  var btns = document.querySelectorAll('.nav-row .btn:not(.secondary):not(.ghost)');
+  for(var j=0;j<btns.length;j++) btns[j].disabled = !ok;
+  var hints = document.querySelectorAll('.note-hint');
+  for(var k=0;k<hints.length;k++){
+    var box = hints[k].previousElementSibling;
+    if(box && box.value !== undefined) hints[k].style.display = box.value.trim() ? 'none' : '';
+  }
+}
+function harvestOpenInputs(){
+  var nodes = document.querySelectorAll('textarea[id^="input-"], input[id^="note-"]');
+  for(var i=0;i<nodes.length;i++){
+    var el = nodes[i], id = el.id;
+    if(id.indexOf('input-')===0) state.answers[id.slice(6)] = el.value;
+    else state.answers[id.slice(5)+'__note'] = el.value;
+  }
+}
 function normOpt(o){ return Array.isArray(o) ? {l:o[0], note:o[1]} : {l:o, note:null}; }
 
 function setAnswer(qid, val){
@@ -548,7 +578,7 @@ function renderSingle(q){
     </label>`;
   });
   if(showNote){
-    html += `<input type="text" id="note-${q.id}" class="note-input" placeholder="${escAttr(selectedOpt.note)}" value="${escAttr(state.answers[q.id+'__note']||'')}" oninput="if(!event.isComposing) setNote('${q.id}', this.value)" oncompositionend="setNote('${q.id}', this.value)">
+    html += `<input type="text" id="note-${q.id}" class="note-input" placeholder="${escAttr(selectedOpt.note)}" value="${escAttr(state.answers[q.id+'__note']||'')}" oninput="setNoteQuiet('${q.id}', this.value)" onchange="setNoteQuiet('${q.id}', this.value)" onblur="flushInput()">
     <div class="note-hint">请填写后才能继续下一步</div>`;
   }
   html += `</div>`;
@@ -570,7 +600,7 @@ function renderMulti(q){
   });
   if(anyNoteSelected){
     const notePh = opts.find(o=>o.note && val.includes(o.l)).note;
-    html += `<input type="text" id="note-${q.id}" class="note-input" placeholder="${escAttr(notePh)}" value="${escAttr(state.answers[q.id+'__note']||'')}" oninput="if(!event.isComposing) setNote('${q.id}', this.value)" oncompositionend="setNote('${q.id}', this.value)">
+    html += `<input type="text" id="note-${q.id}" class="note-input" placeholder="${escAttr(notePh)}" value="${escAttr(state.answers[q.id+'__note']||'')}" oninput="setNoteQuiet('${q.id}', this.value)" onchange="setNoteQuiet('${q.id}', this.value)" onblur="flushInput()">
     <div class="note-hint">请填写后才能继续下一步</div>`;
   }
   html += `</div>`;
@@ -588,7 +618,7 @@ function renderText(q){
   const val = state.answers[q.id] || '';
   return `<div class="q" data-qid="${q.id}">
     <div class="q-text">${q.text}${q.optional?'':'<span class="q-required">*</span>'}</div>
-    <textarea id="input-${q.id}" class="note-input" rows="3" placeholder="${escAttr(q.placeholder||'请输入您的回答...')}" oninput="if(!event.isComposing) setAnswer('${q.id}', this.value)" oncompositionend="setAnswer('${q.id}', this.value)">${escHtml(val)}</textarea>
+    <textarea id="input-${q.id}" class="note-input" rows="3" placeholder="${escAttr(q.placeholder||'请输入您的回答...')}" oninput="setAnswerQuiet('${q.id}', this.value)" onchange="setAnswerQuiet('${q.id}', this.value)" onblur="flushInput()">${escHtml(val)}</textarea>
   </div>`;
 }
 
@@ -602,7 +632,7 @@ function renderScale5(q){
   }
   html += `</div>`;
   if(q.noteIf && val && q.noteIf(val)){
-    html += `<input type="text" id="note-${q.id}" class="note-input" placeholder="${escAttr(q.notePlaceholder||'请说明：')}" value="${escAttr(state.answers[q.id+'__note']||'')}" oninput="if(!event.isComposing) setNote('${q.id}', this.value)" oncompositionend="setNote('${q.id}', this.value)">
+    html += `<input type="text" id="note-${q.id}" class="note-input" placeholder="${escAttr(q.notePlaceholder||'请说明：')}" value="${escAttr(state.answers[q.id+'__note']||'')}" oninput="setNoteQuiet('${q.id}', this.value)" onchange="setNoteQuiet('${q.id}', this.value)" onblur="flushInput()">
     <div class="note-hint">请填写后才能继续下一步</div>`;
   }
   html += `</div>`;
@@ -705,7 +735,7 @@ function renderPart1(){
   return html;
 }
 function backToIntro(){ state.screen='intro'; render(); window.scrollTo(0,0); }
-function goToBranch(){
+function goToBranch(){ harvestOpenInputs();
   const b = branchOf(state.answers);
   state.answers.__branch = b;
   state.screen = 'branch';
@@ -743,12 +773,12 @@ function renderBranch(){
   html += `</div>`;
   return html;
 }
-function prevSection(){
+function prevSection(){ harvestOpenInputs();
   if(state.sectionIndex===0){ state.screen='part1'; render(); window.scrollTo(0,0); return; }
   state.sectionIndex -= 1;
   render(); window.scrollTo(0,0);
 }
-function nextSection(){
+function nextSection(){ harvestOpenInputs();
   const b = state.answers.__branch;
   const total = SECTIONS_BY_BRANCH[b].length;
   if(state.sectionIndex === total-1){
@@ -776,6 +806,7 @@ function prevSection2(){ state.screen='part1'; render(); window.scrollTo(0,0); }
 /* ============================= 提交 ============================= */
 let __submitting = false;
 async function submitSurvey(){
+  harvestOpenInputs();
   if(__submitting) return;
   __submitting = true;
   const id = 'sub_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
@@ -876,6 +907,7 @@ function renderAdmin(){
 
   html += `<div class="admin-tabs">
     <div class="admin-tab ${state.adminTab==='summary'?'active':''}" onclick="setAdminTab('summary')">整体汇总</div>
+    <div class="admin-tab ${state.adminTab==='smart'?'active':''}" onclick="setAdminTab('smart')">智能报告</div>
     <div class="admin-tab ${state.adminTab==='list'?'active':''}" onclick="setAdminTab('list')">提交列表</div>
     <div class="admin-tab ${state.adminTab==='common'?'active':''}" onclick="setAdminTab('common')">通用信息</div>
     <div class="admin-tab ${state.adminTab==='A'?'active':''}" onclick="setAdminTab('A')">问卷A·外援</div>
@@ -887,7 +919,8 @@ function renderAdmin(){
 
   if(state.adminTab==='summary') html += renderAdminSummary(subs);
   else if(state.adminTab==='list') html += state.adminView ? renderSubmissionDetail(subs) : renderAdminList(subs);
-  else if(state.adminTab==='export') html += renderAdminExport(subs);
+  else if(state.adminTab==='smart') html += renderSmartReport(subs);
+  else if(state.adminTab==='export') html += renderAdminExport(subs) + renderDangerZone(subs);
   else if(state.adminTab==='open') html += renderAdminOpen(subs);
   else if(state.adminTab==='common') html += renderAdminQuestionSet(subs, PART1.filter(q=>q.type!=='text'), null);
   else html += renderAdminQuestionSet(subs, SECTIONS_BY_BRANCH[state.adminTab].flatMap(s=>s.qs).filter(q=>q.type!=='text'), state.adminTab);
@@ -1014,6 +1047,7 @@ function renderAdminList(subs){
       <span class="tag" style="margin-left:0;">${escHtml(BRANCH_SHORT[s.branch]||s.branch||'—')}</span>
       <span class="sub-time">${escHtml(fmtTime(s.submittedAt))} · 已答 ${answeredCount(s)} 题</span>
       <span class="home-arrow" style="font-size:18px;">›</span>
+      <button class="btn ghost" style="flex:none;padding:5px 10px;font-size:12px;margin-left:6px;" onclick="event.stopPropagation();deleteOne('${escAttr(s.id)}', ${no})">删除</button>
     </div>`;
   });
   return html;
@@ -1064,15 +1098,30 @@ function renderSubmissionDetail(subs){
 /* ============================= 管理员：报告与导出 ============================= */
 function renderAdminExport(subs){
   return `
+  <div class="admin-q-block" style="border:2px solid var(--accent);">
+    <div class="admin-q-title">智能分析报告（新）</div>
+    <div class="small-muted" style="margin-bottom:12px;">自动生成：结论摘要、健康度评分卡、风险 TOP5、员工原话分类汇编（每条可点回问卷原文）、地区×岗位分组下钻、应对措施建议。</div>
+    <button class="btn" style="flex:none;" onclick="setAdminTab('smart')">打开智能分析报告</button>
+  </div>
   <div class="admin-q-block">
     <div class="admin-q-title">统计报告（可打印 / 存为 PDF）</div>
     <div class="small-muted" style="margin-bottom:12px;">汇总全部已提交问卷：样本构成、重点关注信号、逐题统计与开放性反馈，可直接打印或在打印窗口选择「另存为 PDF」。</div>
     <button class="btn" style="flex:none;" onclick="openReport()">生成统计报告</button>
   </div>
+  <div class="admin-q-block" style="border:1.5px solid var(--accent);">
+    <div class="admin-q-title">Excel 表格（推荐 · 逐题清单）</div>
+    <div class="small-muted" style="margin-bottom:12px;">一行一道题：编号 / 时间 / 问卷类型 / 地区 / 岗位 / 板块 / 题目 / 答案 / 补充说明。列宽已排好、首行冻结，Excel 打开即可读，可直接筛选。</div>
+    <button class="btn" style="flex:none;" onclick="exportExcelLong()">导出 Excel（逐题清单）</button>
+  </div>
   <div class="admin-q-block">
-    <div class="admin-q-title">CSV 明细表（Excel 可直接打开）</div>
-    <div class="small-muted" style="margin-bottom:12px;">每行一份问卷、每列一道题；选项按「A. 选项内容」记录，含补充说明与主观题全文。</div>
-    <button class="btn secondary" style="flex:none;" onclick="exportCSV()">导出 CSV 明细</button>
+    <div class="admin-q-title">Excel 表格（宽表 · 一行一份问卷）</div>
+    <div class="small-muted" style="margin-bottom:12px;">每行一份问卷、每列一道题，适合整体比对。列宽与表头换行已处理，不会挤成一团。</div>
+    <button class="btn secondary" style="flex:none;" onclick="exportExcelWide()">导出 Excel（宽表）</button>
+  </div>
+  <div class="admin-q-block">
+    <div class="admin-q-title">CSV 原始文件</div>
+    <div class="small-muted" style="margin-bottom:12px;">供导入其他系统使用；用 Excel 直接打开会比较拥挤，建议优先用上面的 Excel 导出。</div>
+    <button class="btn ghost" style="flex:none;" onclick="exportCSV()">导出 CSV</button>
   </div>
   <div class="admin-q-block">
     <div class="admin-q-title">原始数据（JSON）</div>
@@ -1080,6 +1129,99 @@ function renderAdminExport(subs){
     <button class="btn secondary" style="flex:none;" onclick="exportJSON()">导出 JSON 原始数据</button>
   </div>
   <div class="small-muted">提示：如在微信内无法下载文件，请点右上角「···」选择「在浏览器打开」后再操作。</div>`;
+}
+
+function renderDangerZone(subs){
+  return '<div class="admin-q-block" style="border:2px solid var(--danger);margin-top:18px;">'
+    + '<div class="admin-q-title" style="color:var(--danger);">危险操作 · 清空全部答卷</div>'
+    + '<div class="small-muted" style="margin-bottom:12px;">当前云端共 ' + subs.length + ' 份答卷。清空后立即归零、无法恢复，建议先导出 Excel 备份。正式发放问卷前用它清掉测试数据。</div>'
+    + '<button class="btn" style="flex:none;background:var(--danger);box-shadow:none;" onclick="deleteAll()">清空全部答卷（不可恢复）</button>'
+    + '</div>';
+}
+async function deleteOne(id, no){
+  if(!state.adminCreds) return;
+  if(!confirm('确定删除第 #'+no+' 份答卷？删除后无法恢复。')) return;
+  try{
+    const r = await fetch('/api/delete', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({user:state.adminCreds.user, pass:state.adminCreds.pass, id:id})});
+    if(!r.ok) throw new Error(r.status);
+    await refreshSubmissions();
+  }catch(e){ alert('删除失败，请稍后重试。'); }
+}
+async function deleteAll(){
+  if(!state.adminCreds) return;
+  if(!confirm('将清空云端全部答卷并归零，且无法恢复。确定继续吗？')) return;
+  const t = prompt('请输入 DELETE 四个大写字母以确认清空：');
+  if(t !== 'DELETE'){ alert('未确认，已取消。'); return; }
+  try{
+    const r = await fetch('/api/delete', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({user:state.adminCreds.user, pass:state.adminCreds.pass, all:true})});
+    if(!r.ok) throw new Error(r.status);
+    const j = await r.json();
+    await refreshSubmissions();
+    alert('已清空 '+(j.removed||0)+' 份答卷，数据已归零。');
+  }catch(e){ alert('清空失败，请稍后重试。'); }
+}
+function xlsEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function buildXls(cols, rows, sheet){
+  var thead = '<tr>' + cols.map(function(c){ return '<th style="background:#1f3a5f;color:#ffffff;font-weight:700;border:.5pt solid #99a;vertical-align:middle;">'+xlsEsc(c.t)+'</th>'; }).join('') + '</tr>';
+  var body = rows.map(function(r){
+    return '<tr>' + r.map(function(v){ return '<td style="border:.5pt solid #cccccc;vertical-align:top;mso-number-format:\\@;">'+xlsEsc(v)+'</td>'; }).join('') + '</tr>';
+  }).join('');
+  var colgroup = cols.map(function(c){ return '<col width="'+(c.w||120)+'">'; }).join('');
+  return '<html xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="utf-8">'
+    + '<xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>'+sheet+'</x:Name>'
+    + '<x:WorksheetOptions><x:FreezePanes/><x:FrozenNoSplit/><x:SplitHorizontal>1</x:SplitHorizontal><x:TopRowBottomPane>1</x:TopRowBottomPane><x:ActivePane>2</x:ActivePane></x:WorksheetOptions>'
+    + '</x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml>'
+    + '<style>td,th{font-family:"Microsoft YaHei";font-size:10pt;padding:3px 6px;white-space:normal;}</style>'
+    + '</head><body><table border="0" cellspacing="0">'+colgroup+thead+body+'</table></body></html>';
+}
+function plainAnswer(q, answers){
+  var v = answers[q.id];
+  if(v===undefined || v===null || v==='' || (Array.isArray(v)&&v.length===0)) return '';
+  if(q.type==='scale5') return v + ' 分（满分 5）';
+  if(q.type==='text') return String(v);
+  var opts = (q.opts||[]).map(normOpt);
+  var lab = function(label){ var i = opts.findIndex(function(o){return o.l===label;}); return (i>-1? optLetter(i)+'. ':'') + label; };
+  return Array.isArray(v) ? v.map(lab).join('；') : lab(v);
+}
+function sectionOfQ(q, branch){
+  var secs = SECTIONS_BY_BRANCH[branch];
+  if(secs) for(var i=0;i<secs.length;i++){ for(var j=0;j<secs[i].qs.length;j++) if(secs[i].qs[j].id===q.id) return secs[i].title; }
+  return q.branch==='common' ? '通用信息' : '其他';
+}
+function exportExcelLong(){
+  var subs = chronoSubs(Array.isArray(state.submissions)?state.submissions:[]);
+  var cols = [{t:'编号',w:50},{t:'提交时间',w:135},{t:'问卷类型',w:150},{t:'地区',w:80},{t:'岗位/身份',w:110},{t:'板块',w:130},{t:'题目',w:340},{t:'答案',w:260},{t:'补充说明',w:220}];
+  var rows = [];
+  subs.forEach(function(s,i){
+    var a = s.answers||{};
+    var region = a.p1_region || '';
+    var role = a.p1_role || BRANCH_SHORT[s.branch] || '';
+    ALL_QUESTIONS.forEach(function(q){
+      if(!(q.branch==='common' || q.branch===s.branch)) return;
+      if(q.showIf && !q.showIf(a)) return;
+      var ans = plainAnswer(q, a), note = a[q.id+'__note'] || '';
+      if(!ans && !note) return;
+      rows.push([i+1, fmtTime(s.submittedAt), BRANCH_LABEL[s.branch]||s.branch||'', region, role, sectionOfQ(q, s.branch), q.text, ans, note]);
+    });
+    if(a.other_feedback) rows.push([i+1, fmtTime(s.submittedAt), BRANCH_LABEL[s.branch]||s.branch||'', region, role, '其他反馈', '您想告诉我们的任何想法', a.other_feedback, '']);
+  });
+  downloadFile(buildXls(cols, rows, '逐题清单'), '问卷逐题清单_'+dateStamp()+'.xls', 'application/vnd.ms-excel;charset=utf-8');
+}
+function exportExcelWide(){
+  var subs = chronoSubs(Array.isArray(state.submissions)?state.submissions:[]);
+  var qs = ALL_QUESTIONS;
+  var cols = [{t:'编号',w:50},{t:'提交时间',w:135},{t:'问卷类型',w:150}].concat(qs.map(function(q){ return {t:(q.branch==='common'?'[通用] ':'[问卷'+q.branch+'] ')+q.text, w:220}; }));
+  var rows = subs.map(function(s,i){
+    var a = s.answers||{};
+    var row = [i+1, fmtTime(s.submittedAt), BRANCH_LABEL[s.branch]||s.branch||''];
+    qs.forEach(function(q){
+      if(!(q.branch==='common' || q.branch===s.branch)){ row.push('—'); return; }
+      var ans = plainAnswer(q, a), note = a[q.id+'__note'];
+      row.push(ans + (note && String(note).trim() ? '（补充：'+note+'）' : ''));
+    });
+    return row;
+  });
+  downloadFile(buildXls(cols, rows, '问卷明细'), '问卷明细宽表_'+dateStamp()+'.xls', 'application/vnd.ms-excel;charset=utf-8');
 }
 
 function answerCSV(q, answers){
@@ -1241,6 +1383,175 @@ function renderReport(){
   html += `<div class="report-lines">${'<div class="line"></div>'.repeat(6)}</div>`;
 
   html += `</div>`;
+  return html;
+}
+
+/* ============================= 智能分析报告 ============================= */
+var Q_RULES=[
+ {name:'培训与晋升', re:/晋升|培训|考核|绩效|带教|成长|带人/},
+ {name:'薪酬与结算', re:/薪|工资|报销|结算|补偿|补贴|费用|加班/},
+ {name:'SOP与工具', re:/SOP|流程文档|操作流程|工具|设备|系统/},
+ {name:'任务与指挥', re:/任务|指令|指挥|答复|多头|排班|人手|优先级|返工|安排|汇报|沟通/},
+ {name:'驻外生活与安全', re:/住宿|餐|安全|医疗|保险|签证|交通|生活|轮休|假/},
+ {name:'尊重与协作', re:/尊重|协作|配合|氛围|重视|融入|团队/},
+ {name:'战略认同', re:/战略|市场|投入|增长/},
+ {name:'招募与入职', re:/招募|岗位说明|入职|交接|一致/},
+ {name:'评价与意愿', re:/继续合作|留任|推荐|满意|评价|意愿/}
+];
+function themeOf(q){ for(var i=0;i<Q_RULES.length;i++){ if(Q_RULES[i].re.test(q.text)) return Q_RULES[i].name; } return '其他'; }
+function isNegAnswer(q,x){ if(q.type==='scale5') return typeof x==='number'&&x<=2; return isNegLabel(x); }
+function computeThemeScores(subs){
+  var agg={};
+  subs.forEach(function(s){
+    ALL_QUESTIONS.forEach(function(q){
+      if(q.type==='text') return;
+      if(!(q.branch==='common'||q.branch===s.branch)) return;
+      var v=(s.answers||{})[q.id];
+      if(v===undefined||v===null||v===''||(Array.isArray(v)&&v.length===0)) return;
+      var t=themeOf(q); if(t==='其他') return;
+      agg[t]=agg[t]||{neg:0,n:0};
+      (Array.isArray(v)?v:[v]).forEach(function(x){ agg[t].n++; if(isNegAnswer(q,x)) agg[t].neg++; });
+    });
+  });
+  return Object.keys(agg).filter(function(t){return agg[t].n>=3;}).map(function(t){
+    var share=agg[t].neg/agg[t].n;
+    return {name:t, score:Math.round(100-share*100), neg:agg[t].neg, n:agg[t].n, share:share};
+  }).sort(function(a,b){return a.score-b.score;});
+}
+function scoreBand(sc){ return sc>=75?{w:'绿·健康',c:'#2e7d4f'}:sc>=60?{w:'黄·关注',c:'#b7791f'}:{w:'红·处理',c:'#c0392b'}; }
+function degreeWord(share){ return share>=0.5?'普遍存在':share>=0.3?'较为突出':share>=0.15?'值得关注':'处于健康区间'; }
+var ACTION_MAP={
+ '任务与指挥':{act:'建立「现场唯一指挥人」制度：任务只由现场负责人下达，国内需求先汇总给他，再统一派发',own:'区域负责人',time:'本周'},
+ '培训与晋升':{act:'发布书面晋升标准（年限＋考核分＋技能项），并到各点位宣讲一次',own:'HR＋总经理',time:'本季度'},
+ '薪酬与结算':{act:'报销承诺 15 个工作日到账，超期项在周会逐笔说明原因',own:'财务',time:'本月'},
+ 'SOP与工具':{act:'每点位指定 1 名 SOP 负责人，30 天内补齐缺失文档并挂共享盘',own:'项目经理',time:'30 天'},
+ '驻外生活与安全':{act:'行政实地核查住宿/通勤/餐饮，并向团队公布核查结果',own:'行政',time:'本月'},
+ '招募与入职':{act:'统一岗位说明模板（内容/时长/地点/薪酬四要素），发出后方可安排上岗',own:'HR',time:'本月'},
+ '战略认同':{act:'组织管理层战略对齐会，明确当地市场定位与投入计划',own:'区域负责人',time:'本月'},
+ '尊重与协作':{act:'例会设固定一线/外援发言环节，问题当场记录并指定归属人',own:'项目经理',time:'本周'},
+ '评价与意愿':{act:'对留任意愿偏低群体开展自愿制一对一沟通',own:'HR',time:'本季度'}
+};
+function computeWill(subs){
+  var pos=0,n=0;
+  subs.forEach(function(s){
+    ALL_QUESTIONS.forEach(function(q){
+      if(q.type==='text') return;
+      if(!/继续|留任|推荐/.test(q.text)) return;
+      if(!(q.branch==='common'||q.branch===s.branch)) return;
+      var v=(s.answers||{})[q.id];
+      var label=Array.isArray(v)?v[0]:v;
+      if(typeof label!=='string'||!label) return;
+      n++; if(/愿意|会继续|推荐/.test(label)&&!/不愿|不会|不推荐/.test(label)) pos++;
+    });
+  });
+  return n?Math.round(pos/n*100):null;
+}
+function collectQuotes(subs){
+  var chrono=chronoSubs(subs), groups={};
+  subs.forEach(function(s){
+    var a=s.answers||{};
+    Object.keys(a).forEach(function(k){
+      var isNote=k.indexOf('__note')>-1;
+      var qid=isNote?k.split('__note')[0]:k;
+      var q=null;
+      for(var i=0;i<ALL_QUESTIONS.length;i++){ if(ALL_QUESTIONS[i].id===qid){ q=ALL_QUESTIONS[i]; break; } }
+      if(!q&&qid==='other_feedback') q={id:qid,text:'其他反馈',type:'text'};
+      var val=a[k];
+      if(!q||typeof val!=='string'||!val.trim()) return;
+      if(!isNote&&q.type!=='text') return;
+      var t=themeOf(q);
+      (groups[t]=groups[t]||[]).push({text:val.trim(),branch:s.branch,id:s.id,no:chrono.indexOf(s)+1,q:q.text});
+    });
+  });
+  return groups;
+}
+function gotoOriginal(id){ state.adminTab='list'; state.adminView={id:id}; render(); window.scrollTo(0,0); }
+function setReportGroup(k){ state.reportGroup=k; render(); }
+function scoreBarRow(name, score, extra){
+  var b=scoreBand(score);
+  return '<div style="display:grid;grid-template-columns:118px 34px 1fr;gap:8px;align-items:center;margin-bottom:8px;">'
+    +'<span style="font-size:12.5px;font-weight:600;">'+escHtml(name)+'</span>'
+    +'<span style="font-size:13.5px;font-weight:800;color:'+b.c+';">'+score+'</span>'
+    +'<div><div style="height:10px;background:#eef1f6;border-radius:5px;overflow:hidden;"><div style="height:10px;width:'+score+'%;background:'+b.c+';"></div></div>'
+    +(extra?'<div class="small-muted" style="font-size:11px;margin-top:2px;">'+escHtml(extra)+'</div>':'')
+    +'</div></div>';
+}
+function renderSmartReport(subs){
+  var total=subs.length;
+  var themes=computeThemeScores(subs);
+  var will=computeWill(subs);
+  var signals=computeSignals(subs);
+  var quotes=collectQuotes(subs);
+  var html='<div class="small-muted" style="margin-bottom:12px;">生成时间：'+fmtTime(new Date().toISOString())+' · 样本 '+total+' 份 · 实时计算。样本少于 5 人的分组只作方向性提示（匿名保护）。</div>';
+  if(will!==null){
+    html+='<div class="stat-grid"><div class="stat-box"><div class="stat-num">'+will+'%</div><div class="stat-label">留任/继续合作意愿（北极星指标）</div></div><div class="stat-box"><div class="stat-num">'+total+'</div><div class="stat-label">样本总量</div></div></div>';
+  }
+  html+='<div class="admin-section-head">一、结论摘要（自动生成）</div>';
+  if(!themes.length) html+='<div class="small-muted">数据量不足，暂无法生成主题结论。</div>';
+  themes.slice(0,3).forEach(function(t){
+    if(t.score>=75) return;
+    var b=scoreBand(t.score);
+    html+='<div class="admin-q-block" style="padding:10px 14px;"><b style="color:'+b.c+';">['+b.w.slice(0,1)+']</b> '+escHtml(t.name)+'问题'+degreeWord(t.share)+'：负面回答占 '+Math.round(t.share*100)+'%（'+t.neg+'/'+t.n+' 项作答），措施见文末。</div>';
+  });
+  var best=themes[themes.length-1];
+  if(best&&best.score>=75) html+='<div class="admin-q-block" style="padding:10px 14px;"><b style="color:#2e7d4f;">[绿]</b> '+escHtml(best.name)+'为当前长板（负面仅 '+Math.round(best.share*100)+'%），保持现有做法。</div>';
+  html+='<div class="admin-section-head">二、健康度评分卡（100＝无负面反馈；≥75 绿 / 60–74 黄 / ＜60 红）</div>';
+  themes.slice().reverse().forEach(function(t){ html+=scoreBarRow(t.name,t.score,t.neg+' / '+t.n+' 项负面'); });
+  html+='<div class="admin-section-head">三、风险 TOP 5（负面占比最高的题）</div>';
+  if(!signals.sig.length) html+='<div class="small-muted">暂无达到 30% 阈值的负面信号。</div>';
+  signals.sig.slice(0,5).forEach(function(it,i){
+    html+='<div class="admin-q-block" style="padding:10px 14px;"><div style="font-size:13px;font-weight:700;">'+(i+1)+'. 【'+(it.q.branch==='common'?'通用':'问卷'+it.q.branch)+'】'+escHtml(it.q.text)+'</div><div class="small-muted">'+it.n+' / '+it.total+' 人（'+Math.round(it.share*100)+'%）选择：'+escHtml(it.labels.join('、'))+'</div></div>';
+  });
+  html+='<div class="admin-section-head">四、员工原话（分门别类 · 每条可点回问卷原文）</div>';
+  var anyQuote=false;
+  Object.keys(quotes).forEach(function(t){
+    anyQuote=true;
+    html+='<div class="admin-q-block"><div class="admin-q-title">'+escHtml(t)+' <span class="small-muted">（'+quotes[t].length+' 条）</span></div>';
+    quotes[t].forEach(function(x){
+      html+='<div class="open-answer"><span class="meta">#'+x.no+' · '+(BRANCH_SHORT[x.branch]||'')+' · '+escHtml(x.q)+'</span>'+escHtml(x.text)+'<div style="margin-top:6px;"><a href="javascript:void(0)" data-sid="'+escAttr(x.id)+'" style="font-size:12px;font-weight:700;" onclick="gotoOriginal(this.dataset.sid)">查看这份问卷原文 ›</a></div></div>';
+    });
+    html+='</div>';
+  });
+  if(!anyQuote) html+='<div class="small-muted">暂无文字反馈。</div>';
+  var groups={};
+  subs.forEach(function(s){ var r=(s.answers||{}).p1_region||'未填'; var k=r+' × '+(BRANCH_SHORT[s.branch]||'其他'); (groups[k]=groups[k]||[]).push(s); });
+  var keys=Object.keys(groups).sort();
+  var cur=(state.reportGroup&&groups[state.reportGroup])?state.reportGroup:keys[0];
+  html+='<div class="admin-section-head">五、分组下钻（地区 × 岗位）</div>';
+  html+='<select onchange="setReportGroup(this.value)" style="width:100%;padding:10px;font-size:14px;margin-bottom:12px;border:1.5px solid #d7dde8;border-radius:8px;background:#fff;">';
+  keys.forEach(function(k){ html+='<option value="'+escAttr(k)+'"'+(k===cur?' selected':'')+'>'+escHtml(k)+'（'+groups[k].length+' 份）</option>'; });
+  html+='</select>';
+  if(cur){
+    var gsubs=groups[cur];
+    if(gsubs.length<5) html+='<div class="admin-q-block" style="padding:10px 14px;"><b>⚠ 匿名保护：</b>本组样本仅 '+gsubs.length+' 份，以下对比仅作方向性提示，不展示本组原话，防止身份反推。</div>';
+    var gThemes=computeThemeScores(gsubs);
+    var allMap={}; themes.forEach(function(t){ allMap[t.name]=t.score; });
+    if(!gThemes.length) html+='<div class="small-muted">本组作答量不足，无法计算主题分。</div>';
+    gThemes.forEach(function(t){
+      var base=allMap[t.name];
+      var diff=(base!==undefined)?t.score-base:null;
+      var tag=diff===null?'':(diff<=-8?'（低于全体 '+Math.abs(diff)+' 分，重点看）':(diff>=8?'（高于全体 '+diff+' 分）':'（与全体持平）'));
+      html+=scoreBarRow(t.name,t.score,'全体 '+(base!==undefined?base:'--')+' 分 '+tag);
+    });
+    if(gsubs.length>=5){
+      var gq=collectQuotes(gsubs);
+      Object.keys(gq).forEach(function(t){
+        gq[t].forEach(function(x){
+          html+='<div class="open-answer"><span class="meta">'+escHtml(t)+'</span>'+escHtml(x.text)+'<div style="margin-top:6px;"><a href="javascript:void(0)" data-sid="'+escAttr(x.id)+'" style="font-size:12px;font-weight:700;" onclick="gotoOriginal(this.dataset.sid)">查看原文 ›</a></div></div>';
+        });
+      });
+    }
+  }
+  html+='<div class="admin-section-head">六、应对措施建议（针对黄/红主题自动匹配）</div>';
+  var acted=false;
+  themes.forEach(function(t){
+    if(t.score>=75) return;
+    var a=ACTION_MAP[t.name]; if(!a) return; acted=true;
+    var b=scoreBand(t.score);
+    html+='<div class="admin-q-block" style="padding:10px 14px;"><div style="font-size:13px;font-weight:700;color:'+b.c+';">'+escHtml(t.name)+'（'+t.score+' 分 · '+b.w+'）</div><div style="font-size:13px;margin:4px 0;">'+escHtml(a.act)+'</div><div class="small-muted">责任角色：'+escHtml(a.own)+' · 时限：'+escHtml(a.time)+' · 验证：下一轮问卷同主题得分变化</div></div>';
+  });
+  if(!acted) html+='<div class="small-muted">各主题均在健康区间，无需专项措施。</div>';
+  html+='<div class="small-muted" style="margin-top:14px;">话术规则：负面率 ≥50% 记「普遍存在」，30–49% 记「较为突出」，15–29% 记「值得关注」；单人反映不进结论。请勿依据本报告推断任何填写者身份。</div>';
   return html;
 }
 

@@ -1,1 +1,3 @@
 skills/business-plan-and-consulting-workspace/
+__pycache__/
+*.pyc

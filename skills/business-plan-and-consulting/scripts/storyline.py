@@ -110,7 +110,7 @@ def flags(title, max_chars):
         f.append("COLON")
     if t.endswith("?") or t.endswith("？"):
         f.append("QUESTION")
-    if NUM_TOPICS.search(t) and not re.search(r"\d", t):
+    if NUM_TOPICS.search(t) and not re.search(r"\d|待填|待核|\[X\]|\bX\b|TBD", t):
         f.append("NONUM")
     if COUNT_RE.search(t):
         f.append("COUNT")

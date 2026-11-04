@@ -10,7 +10,7 @@
 // Coordinates follow references/visual-system.md section 4 (13.333 x 7.5 in). Colours are hex without '#'.
 
 const PALETTE = {
-  consulting: { ink: '0B1F3A', primary: '0B1F3A', accent: '2251FF', dark: '051C2C',
+  consulting: { ink: '1F1F1F', primary: '051C2C', accent: '051C2C', dark: '051C2C',
                 grey1: '595959', grey2: '7F7F7F', grey3: 'B3B3B3', grey4: 'D9D9D9', grey5: 'F2F2F2', bg: 'FFFFFF' },
   bain:       { ink: '0B1F3A', primary: '0B1F3A', accent: 'CC0000', dark: '051C2C',
                 grey1: '595959', grey2: '7F7F7F', grey3: 'B3B3B3', grey4: 'D9D9D9', grey5: 'F2F2F2', bg: 'FFFFFF' },

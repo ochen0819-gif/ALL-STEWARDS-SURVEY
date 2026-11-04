@@ -44,9 +44,9 @@ A. Consulting navy (McKinsey or Bain restraint)
 
 | Token | Hex | Use |
 |---|---|---|
-| ink | #0B1F3A | text, rules, totals |
-| navy | #0B1F3A | primary series, highlighted bar |
-| accent | #2251FF (or Bain red #CC0000) | the one so-what element |
+| ink | #1F1F1F | text, rules, totals |
+| navy | #051C2C | primary series, highlighted bar |
+| accent | #051C2C (default; Bain red #CC0000 only when red is the house colour) | the one so-what element |
 | navy-dark | #051C2C | second brand shade when two are needed |
 | grey-1 | #595959 | subtitles, sources, secondary text |
 | grey-2 | #7F7F7F | ghost series dark |
@@ -68,6 +68,8 @@ greys as A.
 Government-facing Chinese material may use 中国红 #C8102E as the single
 accent. Internal reviews and anything for the boss: black and white, red
 only for real risk.
+
+Ryan's standing preference: no bright or electric blue and no cyan anywhere, including McKinsey's #2251FF; a deck where blue blocks carry the design reads as machine-made to him. The accent is #051C2C, used on at most one element per page.
 
 Forbidden everywhere: Office defaults #4472C4 #ED7D31 #A5A5A5 #FFC000 #5B9BD5
 #70AD47; purple-cyan pairs; gradients; any text colour under 4.5:1 contrast

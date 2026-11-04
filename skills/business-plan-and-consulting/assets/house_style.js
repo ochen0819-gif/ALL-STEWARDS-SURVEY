@@ -31,7 +31,8 @@ const GEO = {
   body:    { x: 0.5,  y: 1.55, w: 12.33, h: 5.05 },
   left:    { x: 0.5,  y: 1.55, w: 6.0,   h: 5.05 },
   right:   { x: 6.83, y: 1.55, w: 6.0,   h: 5.05 },
-  source:  { x: 0.5,  y: 6.70, w: 10.5,  h: 0.45 },
+  source:  { x: 0.5,  y: 6.45, w: 11.5,  h: 0.50 },   // Note then Source; ends above the footer strip
+  footer:  { x: 0.5,  y: 7.05, w: 8.0,   h: 0.25 },   // document title left, confidentiality centre, 7 pt grey-2
   pageNo:  { x: 12.3, y: 7.05, w: 0.55,  h: 0.25 },
   sticker: { x: 11.0, y: 0.30, w: 1.85,  h: 0.30 },
 };
@@ -51,6 +52,10 @@ function defineLayouts(pres, P, opts = {}) {
   if (opts.confidential) {
     common.objects.push({ text: { text: opts.confidential, options: { x: 4.5, y: 7.05, w: 4.3, h: 0.25,
       fontFace: font, fontSize: 7, color: P.grey2, align: 'center', isTextBox: true, margin: 0 } } });
+  }
+  if (opts.docTitle) {
+    common.objects.push({ text: { text: opts.docTitle, options: { x: 0.5, y: 7.05, w: 4.0, h: 0.25,
+      fontFace: font, fontSize: 7, color: P.grey2, align: 'left', isTextBox: true, margin: 0 } } });
   }
   pres.defineSlideMaster({
     title: 'CONTENT',
@@ -91,6 +96,13 @@ function addSourceLine(slide, text, P = PALETTE.consulting, note) {
     align: 'left', valign: 'bottom', isTextBox: true, margin: 0 });
 }
 
+function addFooter(slide, docTitle, confidential, P = PALETTE.consulting) {
+  slide.addText(docTitle, { ...GEO.footer, w: 4.0, fontFace: FONT.latin, fontSize: 7, color: P.grey2,
+    align: 'left', valign: 'middle', isTextBox: true, margin: 0 });
+  if (confidential) slide.addText(confidential, { ...GEO.footer, x: 4.5, w: 4.3, fontFace: FONT.latin, fontSize: 7,
+    color: P.grey2, align: 'center', valign: 'middle', isTextBox: true, margin: 0 });
+}
+
 function addSticker(slide, text, P = PALETTE.consulting) {
   slide.addText(text.toUpperCase(), { ...GEO.sticker, fontFace: FONT.latin, fontSize: SIZE.sticker, color: P.grey1,
     align: 'center', valign: 'middle', isTextBox: true, margin: 0, line: { color: P.grey3, width: 0.75 } });
@@ -124,4 +136,4 @@ function highlightColors(P, n, highlightIndex) {
   return Array.from({ length: n }, (_, i) => (i === highlightIndex ? P.accent : P.grey3));
 }
 
-module.exports = { PALETTE, FONT, GEO, SIZE, defineLayouts, addSourceLine, addSticker, chartOptions, highlightColors };
+module.exports = { PALETTE, FONT, GEO, SIZE, defineLayouts, addSourceLine, addFooter, addSticker, chartOptions, highlightColors };

@@ -111,6 +111,13 @@ rules          0.75 pt grey-4; optional title underline 0.75 pt ink at y 1.12
 confidential   footer centre 7 pt grey-2 on client and bank decks
 ```
 
+Footer zone, bottom to top: page number and the footer strip (document title
+left, confidentiality centre) at y 7.05; the Note and Source block ends above
+them at y 6.95. The two never share a line. Body content should reach at
+least two-thirds of the way down the body area; a page that is empty below
+the midline has a one-line message, so enlarge the exhibit, add the
+commentary panel beside it, or merge the page into its neighbour.
+
 Title, source line and page number sit at identical coordinates on every
 slide. Snap everything to a 12-column grid on the 0.5 in margin. Blocks are
 separated by at least 0.25 in of white space or a thin rule, never by a
@@ -192,6 +199,12 @@ House rules by type (think-cell vocabulary):
 | 2x2 | axis labels as the criteria; quadrant labels 9 pt grey; at most 12 bubbles labelled directly; no quadrant fills beyond a 5 percent tint; the recommended quadrant is the only one highlighted |
 | Football field | floating horizontal bars per method; current price or offer as a vertical dashed line; percentile ticks; every endpoint footnoted |
 | Line | 12 or more periods, at most four series; highlighted series thicker and in brand colour; label at line end; markers only at end points |
+
+When not to draw a chart: two numbers are a sentence or two big numbers,
+not a bar chart; a single value against a target is a labelled bullet bar,
+not a gauge; more than five lines become small multiples; more than seven
+stacked segments get an "other" bucket or a sorted bar. A chart that needs a
+paragraph to read is redesigned.
 
 Implementation: label font 10 pt, axis 9 pt, source 8 pt in the deck body
 font. Left and top spines off; bottom spine 0.75 pt #B3B3B3; tick marks

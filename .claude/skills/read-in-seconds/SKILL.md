@@ -1,0 +1,68 @@
+---
+name: read-in-seconds
+description: >-
+  Write a status report, weekly-report email, handoff, review result, or
+  progress reply that goes to a boss, GC, or client, so the reader gets the
+  point in seconds: verdict first, only what they must act on or trust, short
+  scannable lines. Use for deliverables that report work, findings, or
+  results, including scheduled emails. Not for Claude's own chat replies in
+  this session, requested raw output, full files, or explicitly requested long
+  explanations. A document that asks the reader to make a decision goes to
+  minto-pyramid; a short WeChat/WhatsApp message goes to shuo-zhongdian.
+  周报、进度汇报、交付说明、评审结论、给老板的状态回复：结论先行、短、好扫读。
+---
+
+# Read in seconds
+
+Goal: the reader knows the result and what to do next within ten seconds.
+Shorten the writing, never the checking.
+An explicit request for complete output keeps its required content. A request
+for complete checking alone does not ask for a long answer.
+
+## Shape
+
+1. **First line = verdict.** For work updates: Done / in progress / not done /
+   blocked. For reviews or advice, state the result or recommendation. Include
+   the reader's next action only when needed.
+2. **Only when needed: reader decisions**, numbered, with your recommendation.
+   Ask only for missing information or authorization that changes the task;
+   do not repeat an approval already given.
+3. **Then at most 3–5 facts** that make the verdict trustworthy or change a
+   decision. One idea per line, one line per idea. This limit never applies to
+   findings that must be reported (review issues, failures, risks): list every
+   one, one line each, most severe first.
+4. Stop. Offer details in one short line only if they exist and might matter.
+
+## Cut
+
+- Process narration ("first I…, then I…"), tool names, and steps that went fine.
+- Restating the request or context the reader already has.
+- Hedges, filler, repeated conclusions, closing pleasantries.
+- Tables unless comparing several items across the same fields.
+- Anything the reader cannot act on and does not need for trust.
+
+## Keep, always, even when short
+
+- Failures, unverified parts, open risks, and actions only the reader can take.
+- The exact number, path, command, or link needed to act.
+- A tag for uncertainty: `未验证` / `推测` / `unverified`.
+
+## Style
+
+- Lines under ~25 字 / 15 words when possible. No bold in body text: WeChat
+  has none, and in a document it reads as AI emphasis.
+- Routine update: ≤ 5 lines. Complex result: ≤ 15 lines before "details".
+  A Cx weekly report across several buildings or systems is a complex result:
+  use the 15-line tier. Failures and open risks are never cut to fit.
+- One name per concept: call the same metric, file, or state by the same word
+  throughout; a new word reads as a new thing.
+- Steps the reader runs: one action per step, imperative, condition before the
+  action ("若 hook 拦截，运行 …").
+- Same language as the user; keep code, paths, and identifiers verbatim.
+- Emails: subject carries the verdict; body follows the same shape.
+
+## Check before sending
+
+Could the reader stop after line 1 and still act correctly? Is every other line
+either a needed decision, a trust-critical fact, or a required action? Delete
+the rest.

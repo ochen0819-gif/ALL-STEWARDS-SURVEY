@@ -208,3 +208,106 @@ answer inside the first paragraph instead.
 - 智库式要求：开门见山、2 到 3 千字正文另附详版、论据一手、不讲常识、不放公式。
 - 每个建议写全五项：做什么、谁做、何时、花多少、得多少。缺一项就是口号。
 - "以…为抓手、以…为引领"一律改成"通过做 X，实现 Y（数字）"。
+
+## 11. Rules measured on real decks, and the title traps machines fall into
+
+From a scoring of 102 public McKinsey, BCG, Bain and Big Four decks, and
+from the open-source deck rulebooks listed in `sources.md`:
+
+- Decks whose titles are full-sentence claims score high, decks with label
+  titles score low, regardless of firm or polish. Top decks carry a number
+  in at least a third of titles.
+- Main-flow slides run 60 to 175 words with one exhibit. "(1 of 2)" titles
+  are a symptom of an overfull slide, not a technique.
+- Every number gets a contrast: benchmark, segment, prior period or a
+  named case. "Source: BCG" on every page helps nobody; name the dataset,
+  the n and the as-of date.
+- Enumerate, expand in the same order and numbering, recap. Never end on
+  evidence or on "Questions?".
+- Recommendations are quantified as a range with a timeline and the funding
+  shown, mapped one to one onto findings, each with owner, impact, cost and
+  date.
+- A synthesis page before the body is bullets with a number per theme, never
+  prose over 200 words.
+
+Title traps that read as machine-made:
+
+- Element counts in titles ("five steps", "三大优势"). A count is not a
+  claim; write what the elements add up to. Numbers belong in a title only
+  when the number is the message.
+- "Label: claim" prefixes ("现状与课题：…", "Roadmap: …"). The title
+  read-through turns into a table of contents. Start with the subject.
+- Every title built on the same sentence pattern. When 60 percent of titles
+  open the same way, the deck was templated, not argued.
+- Claim stronger than evidence. "99 percent cheaper" needs the formula and
+  assumptions on the same page, recomputed to match. Others' cases are
+  reported at their real stage ("working on", not "deployed"). Absolutes
+  ("never", "100 percent") are replaced by the mechanism.
+- Title says three phases, body shows four.
+- A sharp title over a body that argues something else. That is worse than
+  a label, because it promises and does not deliver.
+- Framework names on the client page (SCQA, MECE, Pyramid). Those are the
+  maker's tools; the page uses content words.
+
+One document, one term. The same metric carries the same value, unit,
+rounding and as-of date on every page; executive pages round to about two
+significant figures with 约 or "about", exact figures go to the evidence
+page. Forward labels start from the current year (2026E, never a past year
+marked E). Sources: the latest release of a named dataset; never a blog, an
+AI summary, or a Statista projection as the only source for a number;
+never an invented URL.
+
+## 12. Deck spines
+
+Client deliverable: cover; context and objectives with an explicit "this
+report does / does not cover"; approach (phases, interview counts);
+executive summary; findings (baseline before gap, benchmarks against named
+peers, interview quotes beside data); recommendations (numbered overview,
+impact-effort matrix, one page per recommendation with what, impact, cost,
+owner; funding waterfall); next steps owned and dated; appendix with its
+own divider. Tracker pages only above about 30 slides. A gap-closing deck
+carries the same money figure through the titles: baseline, gap, within
+our control, remaining, needs others, deadline.
+
+Proposal: cover letter; our understanding of your situation (facts gathered
+before being hired, day-one hypotheses); objectives and deliverables as
+concrete artefacts; approach and workplan with dated milestones; team
+including the client's roles; relevant cases; fees separate and late;
+one-page summary of scope, timeline, team and price.
+
+Narrative arcs by document: SCR for pitches; SCQA for board papers; what,
+so what, now what for recaps; before, during, after for progress reports;
+problem, mechanism, proof for product.
+
+## 13. Review formats
+
+When reviewing rather than writing, use one of these, never a free-form
+essay:
+
+Critic grade. Green, Yellow or Red with a one-line verdict; a
+section-by-section table (what it does, what is missing); the top three
+fixes ranked by impact; one thing that works and must be protected. Yellow
+is the most common grade. Run the critic before any formatting.
+
+Partner review. Findings sorted into blockers (story or logic broken),
+majors (an exhibit or title wrong) and minors (alignment, colour), each
+tied to a page number; the review-ready verdict first; the three
+highest-impact fixes last. Order of inspection: story, titles, MECE,
+exhibits, craft, density, consistency, evidence, ask.
+
+Minto audit. Quote the governing thought verbatim or write "not stated";
+check vertical logic (does the level below answer why or how), horizontal
+logic (same kind, MECE, with exhaustiveness marked "not verifiable" unless
+the universe is defined), and ordering (name one of the four or say none).
+Verdict from the reader's effect, not from the number of findings: share as
+is, minor edits, restructure. Do not force three. Risks, constraints and
+next steps are not reasons, but they are not deleted; they get a closing
+slot, and a decisive risk sits beside the answer.
+
+Fresh-eyes review. Hand the finished file to a second agent that is told
+nothing about how it was made and ask it, as the decision maker, to list
+three to ten reasons it would send the document back; then title versus
+body count mismatches, title versus chart conclusion mismatches, and
+unsupported evaluative words ("limited", "sufficient", "no problem"). Its
+findings go into an adopt/reject table (page, quote, type, decision,
+reason) that travels with the delivery note.

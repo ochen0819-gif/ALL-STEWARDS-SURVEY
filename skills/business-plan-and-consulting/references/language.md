@@ -165,3 +165,42 @@ experience and local relationships give us a strong moat.
 After: Three international firms (named in the appendix) bid on every Johor
 hyperscale project. We won two of the last five bids on price; if they
 match our price, our margin falls from 28 to 15 percent.
+
+## 7. Chinese structural tells beyond vocabulary
+
+Word-level tells fade with every model release; discourse-level tells do
+not. Check these after the word pass:
+
+- 叠"的"："我们的产品的核心的优势" → 产品的核心优势。
+- "进行 + 动词"名词化："对方案进行优化" → 改方案。
+- 连环被字句。
+- 四字词排比当论证；一篇最多一处对仗金句（"硬件为入口、订阅为粘性"）。
+- 同一概念在不同段落换同义词（平台、系统、产品、方案指同一个东西）：一文
+  一词。
+- 段落连接词链（首先、其次、此外、综上 超过三处）。
+- "结论：""核心逻辑：""定位宣言：""一句话概括："标签体行；代码块放卖点。
+- 三个结构完全相同的并列项；每段等长；每句中性无立场。
+- 正文里留着写作批注：[估算假设]、[待补充]、"> 自洽铁律"、文末自检清单、
+  ⚠️✅★。
+- 表格轰炸：痛点、团队、模式全用表格。表格只放参数、财务、对标矩阵，每张表
+  前有一句过渡；图注在图下，表注在表上，"如图 1-1 所示"引入。
+- 英文框架名出现在客户页面上（SCQA、MECE、Pyramid、Key takeaways）。
+
+## 8. What a rewrite must preserve
+
+Rewriting is not a licence to improve the facts. Keep, unchanged: who does
+what; every number, date, unit and comparison direction; conditions, scope
+and negation; modality (may, will, must) and completion state (done,
+planned, under test); attribution (reporting a claim is not making it);
+the author's hesitation and intentional repetition; quotations, titles and
+proper names. Never add a fact, name, number, date, quote or citation.
+Never upgrade an exclusion ("not for lack of effort") into a positive fact
+("everyone worked hard").
+
+The five edits that are always allowed: cut greetings, thanks and teasers;
+cut writing-order markers; cut full duplicates; cut nominalisation and
+function-word clutter; cut baseless reader flattery.
+
+When rules conflict, the order is: facts and evidence strength, then the
+user's scope and register, then the author's voice, then natural language,
+then the original form.

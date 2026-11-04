@@ -52,7 +52,15 @@ EN_PHRASES = ["additionally", "furthermore", "moreover", "in addition,", "in con
               "in an era of", "this document aims", "this report is structured"]
 
 TRACE = ["Claude", "ChatGPT", "GPT", "AI生成", "大模型", "prompt", "skill", "种子", "prebill", "弹药",
-         "TODO", "lorem", "[insert", "[INSERT", "XXX", "TBD", "placeholder"]
+         "TODO", "lorem", "[insert", "[INSERT", "XXX", "TBD", "placeholder",
+         # drafting tags that must not survive into a delivered document
+         "[估算假设]", "[真实数据]", "[待补充]", "[NOT PROVIDED]", "[INFORMATION NEEDED]", "[VERIFY]",
+         "[LEGAL REVIEW]", "[A]", "[D]", "[M]", "[B]", "[E]"]
+# "Label: claim" lines and bold-label lists read as machine-made in business documents
+LABEL_COLON_RE = re.compile(r"^\s*(定位宣言|核心逻辑|一句话概括|关键结论|核心观点|总结|结论|背景|现状|问题|方案|建议|"
+                            r"Key takeaway|Bottom line|Summary|Conclusion|Insight|Takeaway|Context|Problem|"
+                            r"Solution|Recommendation)\s*[:：]", re.I)
+BOLD_LABEL_RE = re.compile(r"^\s*[-*•]?\s*\*\*[^*]{1,30}\*\*\s*[:：]")
 
 EMOJI_RE = re.compile("[\U0001F300-\U0001FAFF✅❌⚠⭐✔✖➡→⬆]")
 DASH_RE = re.compile("—")
@@ -160,6 +168,10 @@ def scan(text, lang):
                     hits.append((cat, p, n, line.strip()[:120]))
         if EMOJI_RE.search(line):
             hits.append(("emoji", EMOJI_RE.search(line).group(0), n, line.strip()[:120]))
+        if LABEL_COLON_RE.match(line):
+            hits.append(("label-colon", LABEL_COLON_RE.match(line).group(0).strip(), n, line.strip()[:120]))
+        if BOLD_LABEL_RE.match(line):
+            hits.append(("bold-label", "**x**:", n, line.strip()[:120]))
     dashes = len(DASH_RE.findall(text))
     bold = len(re.findall(r"\*\*[^*]+\*\*", text))
     return hits, {"em_dashes": dashes, "bold_runs": bold, "lines": len(lines)}

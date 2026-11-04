@@ -11,9 +11,18 @@ argument. Flags:
     LABEL   topic label, not a claim (no verb or under four words; "Overview",
             "Background", "市场分析", "Introduction" ...)
     LONG    over --max-chars characters (two lines at 20pt)
-    COLON   "X: from A to B" style title; usually a label in disguise
+    COLON   "Label: claim" or "X: from A to B" title; the label half is a
+            table-of-contents entry, start the title with the subject instead
     QUESTION a title that asks instead of answers
     NONUM   a title about size, growth, cost or share that carries no number
+    COUNT   title names a count of elements ("three reasons", "5 steps", "三大优势");
+            a count is not a claim, say what the elements add up to
+    PATTERN printed once at the end when 60 percent or more of titles open with
+            the same two words; a deck whose titles share one template reads as
+            copied, not argued
+
+For .pptx it also prints words per slide (consulting main-flow slides run
+60 to 175 words) and the share of sentence titles (top decks: 70 percent+).
 
 Exit code 0 always; this is a readout for a human, not a gate.
 """
@@ -29,6 +38,10 @@ LABEL_WORDS = {"overview", "background", "introduction", "summary", "agenda", "c
                "概述", "概览", "背景", "引言", "目录", "议程", "市场分析", "行业分析", "竞争分析",
                "产品介绍", "团队介绍", "财务预测", "融资计划", "风险分析", "总结", "谢谢", "附录",
                "项目概况", "公司简介", "发展规划", "商业模式", "下一步", "现状", "问题", "方案"}
+COUNT_RE = re.compile(r"\b(two|three|four|five|six|seven|\d+)\s+(reasons|steps|levers|pillars|ways|"
+                      r"drivers|factors|priorities|options|phases|risks|areas|themes|initiatives)\b|"
+                      r"[三四五六七八九十两\d]+[大个项条种类]?(原因|步骤|举措|支柱|方面|优势|驱动|因素|"
+                      r"阶段|风险|建议|方向|措施|维度|环节|要点)", re.I)
 NUM_TOPICS = re.compile(r"(market|growth|cost|revenue|margin|share|size|price|saving|cagr|"
                         r"市场|增长|成本|收入|毛利|份额|规模|价格|节省|利润|产能)", re.I)
 VERB_HINT = re.compile(r"\b(is|are|will|can|should|must|has|have|need|needs|drives|grows|falls|"
@@ -99,7 +112,27 @@ def flags(title, max_chars):
         f.append("QUESTION")
     if NUM_TOPICS.search(t) and not re.search(r"\d", t):
         f.append("NONUM")
+    if COUNT_RE.search(t):
+        f.append("COUNT")
     return f
+
+
+def slide_words(path):
+    from pptx import Presentation
+    out = []
+    for s in Presentation(path).slides:
+        n = 0
+        for sh in s.shapes:
+            if sh.has_text_frame:
+                txt = sh.text_frame.text
+                n += len(re.findall(r"[A-Za-z0-9]+|[\u4e00-\u9fff]", txt))
+        out.append(n)
+    return out
+
+
+def opening(t):
+    words = re.findall(r"[A-Za-z]+|[\u4e00-\u9fff]{2}", t)
+    return " ".join(w.lower() for w in words[:2])
 
 
 def main():
@@ -110,12 +143,27 @@ def main():
     ext = os.path.splitext(a.file)[1].lower()
     items = {".pptx": titles_pptx, ".docx": titles_docx}.get(ext, titles_md)(a.file)
     bad = 0
-    for tag, t in items:
+    words = slide_words(a.file) if ext == ".pptx" else []
+    for i, (tag, t) in enumerate(items):
         fl = flags(t, a.max_chars)
         bad += bool(fl)
-        print(f"{tag:<4} {','.join(fl) or '-':<18} {t}")
-    print(f"\n{len(items)} titles, {bad} flagged. Read the titles top to bottom: "
-          f"do they alone make the argument? If not, the storyline is not done.")
+        w = f"{words[i]:>4}w " if words else ""
+        print(f"{tag:<4} {w}{','.join(fl) or '-':<18} {t}")
+    sentence_share = sum(1 for _, t in items if "LABEL" not in flags(t, a.max_chars)) / max(len(items), 1)
+    print(f"\n{len(items)} titles, {bad} flagged, {sentence_share:.0%} sentence titles "
+          f"(top-tier decks: 70% or more).")
+    if words:
+        heavy = [i + 1 for i, n in enumerate(words) if n > 175]
+        light = [i + 1 for i, n in enumerate(words) if 0 < n < 25]
+        print(f"words per slide: median {sorted(words)[len(words) // 2]}; over 175: {heavy or 'none'}; "
+              f"under 25: {light or 'none'} (main-flow slides run 60 to 175)")
+    from collections import Counter
+    opens = Counter(opening(t) for _, t in items if t)
+    if items and opens:
+        top, cnt = opens.most_common(1)[0]
+        if cnt / len(items) >= 0.6 and len(items) >= 4:
+            print(f"PATTERN: {cnt} of {len(items)} titles open with '{top}'; vary the construction.")
+    print("Read the titles top to bottom: do they alone make the argument? If not, the storyline is not done.")
 
 
 if __name__ == "__main__":

@@ -170,3 +170,72 @@ answers these before they are asked reads as institutional:
   dependency.
 
 Put the answers in an FAQ appendix when they do not fit the body.
+
+## 9. How reviewers spot fabricated financials
+
+Competition judges and fund analysts use the same list. Any one of these
+and the whole plan is read as invented:
+
+1. The three statements do not tie: a profitable P&L with no cash on the
+   cash-flow statement; net income that never reaches retained earnings.
+2. Top-down guesswork: "China market 5 trillion x 0.01 percent = 500
+   million". Revenue must be price x customers x conversion, bottom-up.
+3. Costs not decomposed: only "staff, operations, other"; no headcount x
+   salary, rent, CAC by channel.
+4. Suspicious regularity: arithmetic growth, all round numbers, profitable
+   from day one and forever.
+5. Cross-chapter contradictions: the market chapter opens 200 stores, the
+   finance chapter shows revenue for 40.
+6. Blind optimism: IPO in two to three years, cash-out in year five, R&D
+   share inflated to look technical.
+7. "Expected revenue X" with no derivation; a 12-month cash cliff with an
+   18-month break-even.
+8. Overclaims in words: 全球领先, 国内首创, 革命性颠覆; "conservative
+   projections"; implied market share above 20 percent by year five; CAC
+   falling with no reason; gross margin above 90 percent unexplained; no
+   churn in a subscription model.
+
+Self-consistency checklist before delivery:
+
+- Five-year revenue equals obtainable customers x ARPU x the penetration
+  path, and the customer counts match the operations and hiring chapters.
+- Cash is never negative without the funding tranche that covers it; the
+  profit turn date matches the funding plan.
+- Gross margin is explainable against listed peers.
+- Expense ratios match headcount; revenue per head is in the industry range.
+- At least five assumptions are stated: ARPU and volume; repeat or renewal,
+  CAC, conversion; gross margin and cost shares; headcount and payroll;
+  funding timing, tax and discount rates.
+- Break-even volume equals fixed cost / unit contribution; conservative,
+  base and aggressive cases with volume plus or minus 20 percent and price
+  plus or minus 10 percent.
+- Adjusted EBITDA never appears without reported EBITDA and the itemised
+  bridge.
+
+## 10. Evidence tags while drafting, none at delivery
+
+While drafting an investor memo, a CIM review or a due-diligence summary,
+tag every material claim with its evidence tier so that management claims
+do not get laundered into findings:
+
+| Tag | Meaning |
+|---|---|
+| [A] | audited or third-party verified |
+| [D] | established by our own diligence |
+| [M] | management-asserted |
+| [B] | banker or CIM claim |
+| [E] | our estimate |
+
+Never upgrade a tag. Repetition in the seller's materials is not
+corroboration. A figure that drives returns and carries [M] or [B] belongs
+in the open-items list, with what it would change. Write the risks section
+first, before advocacy sets in; a mitigant that amounts to "we will monitor"
+says so.
+
+In a business plan draft the equivalent tags are 真实数据, 估算假设 and
+待补充. In a prospectus draft they are [INFORMATION NEEDED], [VERIFY] and
+[LEGAL REVIEW]. None of these survive into the delivered text. At delivery
+the honesty moves to a one-paragraph disclosure at the front and an
+assumptions subsection, and the delivery note in chat lists what is still
+missing and what each missing number would change. `scripts/scan.py` flags
+any tag left behind.

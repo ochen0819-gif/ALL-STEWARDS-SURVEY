@@ -44,8 +44,8 @@ COUNT_RE = re.compile(r"\b(two|three|four|five|six|seven|\d+)\s+(reasons|steps|l
                       r"drivers|factors|priorities|options|phases|risks|areas|themes|initiatives)\b|"
                       r"[三四五六七八九十两\d]+[大个项条种类]?(原因|步骤|举措|支柱|方面|优势|驱动|因素|"
                       r"阶段|风险|建议|方向|措施|维度|环节|要点)", re.I)
-NUM_TOPICS = re.compile(r"(market|growth|cost|revenue|margin|share|size|price|saving|cagr|"
-                        r"市场|增长|成本|收入|毛利|份额|规模|价格|节省|利润|产能)", re.I)
+NUM_TOPICS = re.compile(r"(market size|market grows|growth|margin|market share|saving|cagr|"
+                        r"市场规模|增长|增速|毛利率|份额|规模|节省|年复合)", re.I)
 VERB_HINT = re.compile(r"\b(is|are|was|were|be|been|will|can|could|would|should|must|may|has|have|had|do|does|"
                        r"did|need|needs|drive|drives|grow|grows|grew|fall|falls|fell|rise|rises|rose|cost|costs|"
                        r"save|saves|beat|beats|require|requires|deliver|delivers|show|shows|mean|means|reach|"
@@ -93,7 +93,12 @@ def titles_docx(path):
     import docx
     out = []
     for p in docx.Document(path).paragraphs:
-        name = (p.style.name or "").lower()
+        try:
+            name = (p.style.name or "").lower()
+        except AttributeError:  # docx-js output may leave the default style unset
+            name = ""
+        if not name and p.runs and all(r.bold for r in p.runs if r.text.strip()) and len(p.text) < 120:
+            name = "heading 2"  # bold-only short paragraph used as a heading
         if name.startswith("heading") or name.startswith("标题") or name == "title":
             lvl = re.sub(r"\D", "", name) or "1"
             out.append((f"H{lvl}", p.text.strip()))

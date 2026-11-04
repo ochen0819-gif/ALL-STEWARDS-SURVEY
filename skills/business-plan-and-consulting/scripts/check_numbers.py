@@ -143,12 +143,14 @@ def main():
     gen = {".xlsx": tables_xlsx, ".docx": tables_docx, ".pptx": tables_pptx}.get(ext, tables_md)
     problems = check_tables(gen(path))
     try:
-        import subprocess
-        text = subprocess.run(["markitdown", path], capture_output=True, text=True).stdout if ext != ".md" \
-            else open(path, encoding="utf-8", errors="ignore").read()
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from scan import to_text  # same converter as scan.py, with python-docx/pptx/openpyxl fallbacks
+        text = to_text(path)
+        if not text.strip():
+            print("WARN     could not extract text for the repeated-figure check")
         repeated_figures(text)
-    except Exception:
-        pass
+    except Exception as e:  # noqa: BLE001
+        print(f"WARN     repeated-figure check skipped: {e}")
     print(f"\n{problems} total mismatches")
     sys.exit(1 if problems else 0)
 

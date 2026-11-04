@@ -118,7 +118,7 @@ AI 味连接词：首先、其次、再次、最后、综上所述、总而言�
 - A percentage without a base is a flag. "Up 40 percent" needs "from 12 to
   17 customers" next to it when the base is small.
 - The same figure is the same everywhere: the executive summary, the body,
-  the table and the chart. `scripts/numbers.py` finds a label with two
+  the table and the chart. `scripts/check_numbers.py` finds a label with two
   values and a total that does not foot.
 - A projection without its assumptions table is a hockey stick.
 - "No competitors" is never written. "Conservative projections" is never

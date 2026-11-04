@@ -38,12 +38,15 @@ Ryan，缺的写"待核"并说等谁）；不装人味。
 
 ```
 python3 scripts/storyline.py 文件.pptx|.docx|.md     # 只打印标题，标出 LABEL/LONG/COLON/NONUM
-python3 scripts/numbers.py   文件.xlsx|.docx|.pptx|.md  # 合计是否等于分项，同一标签是否出现两个值
+python3 scripts/check_numbers.py   文件.xlsx|.docx|.pptx|.md  # 合计是否等于分项，同一标签是否出现两个值
 python3 scripts/scan.py      文件 [--lang zh|en|both]   # AI 词、黑话、emoji、元数据里的工具名；有命中则退出码 1
 ```
 
 文件本身仍由 docx、pptx、xlsx、pdf 技能生成；本技能决定内容和样式。顺序：读
-本技能，定类型和故事线，再读对应的文件技能动手。
+本技能，定类型和故事线，再读对应的文件技能动手。两处冲突以本技能为准：pptx
+技能里的 Design Ideas（icon、卡片、大数字瓷砖、36 磅标题）不用；house_style.js
+故意用 hex 色而不是 scheme 色，不必跑 applyTheme。pptxgenjs 若 require 失败，
+在 scratchpad 里 npm install 后用 NODE_PATH 指过去。
 
 ## 三种模式
 
@@ -54,7 +57,7 @@ python3 scripts/scan.py      文件 [--lang zh|en|both]   # AI 词、黑话、em
    分）、他要做的决定、原稿的答案在第几页第几句、范围内外、手上的锚点。找不
    到答案就是最大的问题。
 2. 诊断，按严重度排：论证断在哪（标题是标签、没有数字、方案没有推荐、融资没
-   有里程碑）、数字对不上哪里（跑 numbers.py）、用词、视觉、痕迹。列出，不
+   有里程碑）、数字对不上哪里（跑 check_numbers.py）、用词、视觉、痕迹。列出，不
    超过 15 条。
 3. 重建故事线：一段 SCQA，再写 dot-dash 大纲（点是将来的标题，横线是证据，每
    个点带图表草图、数据有无、把握程度）。原稿有的事实、数字、归属、语气强弱
@@ -62,7 +65,7 @@ python3 scripts/scan.py      文件 [--lang zh|en|both]   # AI 词、黑话、em
    10 页或事关重大时，先把大纲给 Ryan 看一眼再动手。
 4. 按文件类型的骨架重排，写判断句标题，写一页摘要（最后写）。
 5. 排版按 visual-system.md，用对应文件技能生成。
-6. 自审分三层，顺序固定：脚本（storyline.py、numbers.py、scan.py，以脚本输出为
+6. 自审分三层，顺序固定：脚本（storyline.py、check_numbers.py、scan.py，以脚本输出为
    准，不口头宣布"通过"）；合伙人 review（storyline.md 第 13 节的顺序：故事、
    标题、MECE、图表、工艺、密度、一致性、证据、请求）；fresh-eyes：把成品交
    给一个不知道制作过程的子 agent，让它以决策者身份列出退回理由，再核标题与
@@ -145,6 +148,8 @@ Ryan 看（聊天里，不出文件），他点头后再出文件。笔记里没
   一档。
 - 给老板的内部材料和复盘：黑白，红色只给真风险；不要封面三件套、目录、页眉
   页脚堆砌。真实截图和照片比重画的图可信。
+- 封面：对外 deck 超过 8 页才要封面，6 页以内的简报第一页直接是答案页；封面
+  标题是文件名，不受判断句规则约束（storyline.py 会把它标成 COV 跳过）。
 
 ## 交付前自检（任一不过就改）
 
@@ -152,7 +157,7 @@ Ryan 看（聊天里，不出文件），他点头后再出文件。笔记里没
 - 第一句是答案加数字，不是背景。
 - storyline.py 输出的标题连起来能成文，没有 LABEL。
 - 每个标题和关键句有数字、基数、期间、来源。
-- numbers.py 没有 MISMATCH；同一指标全篇一个值。
+- check_numbers.py 没有 MISMATCH；同一指标全篇一个值。
 - 建议写全五项；结尾有决定、负责人、日期。
 - 至少一处立场；最重要的一点篇幅最大。
 - 待核项写了等什么、等谁；没有编造的数字。

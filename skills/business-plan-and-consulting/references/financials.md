@@ -2,7 +2,7 @@
 
 Every number in a plan is a claim that a reader will try to re-derive.
 Show the arithmetic, name the source, keep units consistent, and make sure
-the same figure is the same everywhere. `scripts/numbers.py` checks totals
+the same figure is the same everywhere. `scripts/check_numbers.py` checks totals
 and finds a label that appears with two different values.
 
 Contents

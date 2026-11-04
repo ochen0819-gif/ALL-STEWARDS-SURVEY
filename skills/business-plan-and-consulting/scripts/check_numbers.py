@@ -2,7 +2,7 @@
 """Cross-check the numbers in a deliverable.
 
 Usage:
-    python3 numbers.py <file.xlsx|file.docx|file.pptx|file.md>
+    python3 check_numbers.py <file.xlsx|file.docx|file.pptx|file.md>
 
 What it does:
   1. Tables: for every table with a row whose first cell is 合计/总计/小计/Total/
@@ -115,6 +115,12 @@ def check_tables(tables):
     return problems
 
 
+STOP_LABELS = re.compile(r"^(to|from|of|by|at|in|on|for|and|or|the|a|an|x|per|vs|is|are|was|were|than|"
+                         r"jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec|[a-z]*day|slide|page|figure|"
+                         r"exhibit|table|note|source|week|month|year|q[1-4]|fy|h[12]|option|step|phase|day|"
+                         r"[\u4e00-\u9fff]{0,2}(图|表|页|第|周|月|年|日|季度|步|阶段|选项))", re.I)
+
+
 def repeated_figures(text):
     pat = re.compile(r"([一-鿿A-Za-z][一-鿿A-Za-z /]{1,24}?)\s*[:：]?\s*"
                      r"(?:约|超过|近|over|about|c\.|~)?\s*"
@@ -122,7 +128,7 @@ def repeated_figures(text):
     seen = defaultdict(set)
     for m in pat.finditer(text):
         label = m.group(1).strip()
-        if len(label) < 2:
+        if len(label) < 2 or STOP_LABELS.match(label) or STOP_LABELS.match(label.split()[-1]):
             continue
         seen[label].add((m.group(2).replace(",", ""), m.group(3) or ""))
     for label, vals in seen.items():

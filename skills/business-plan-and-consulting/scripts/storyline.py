@@ -9,7 +9,9 @@ or markdown headings, prints them in order, and flags titles that fail the
 horizontal-logic test: a reader who sees only the titles should get the whole
 argument. Flags:
     LABEL   topic label, not a claim (no verb or under four words; "Overview",
-            "Background", "市场分析", "Introduction" ...)
+            "Background", "市场分析", "Introduction" ...). The first slide of a
+            .pptx is tagged COV and not scored when it looks like a cover
+            (three or fewer text boxes, no table or chart).
     LONG    over --max-chars characters (two lines at 20pt)
     COLON   "Label: claim" or "X: from A to B" title; the label half is a
             table-of-contents entry, start the title with the subject instead
@@ -44,11 +46,30 @@ COUNT_RE = re.compile(r"\b(two|three|four|five|six|seven|\d+)\s+(reasons|steps|l
                       r"阶段|风险|建议|方向|措施|维度|环节|要点)", re.I)
 NUM_TOPICS = re.compile(r"(market|growth|cost|revenue|margin|share|size|price|saving|cagr|"
                         r"市场|增长|成本|收入|毛利|份额|规模|价格|节省|利润|产能)", re.I)
-VERB_HINT = re.compile(r"\b(is|are|will|can|should|must|has|have|need|needs|drives|grows|falls|"
-                       r"rises|costs|saves|beats|requires|delivers|shows|means|reaches|exceeds|"
-                       r"doubles|cuts|adds|loses|wins|outperforms|fails|lacks|depends|stays|remains)\b", re.I)
+VERB_HINT = re.compile(r"\b(is|are|was|were|be|been|will|can|could|would|should|must|may|has|have|had|do|does|"
+                       r"did|need|needs|drive|drives|grow|grows|grew|fall|falls|fell|rise|rises|rose|cost|costs|"
+                       r"save|saves|beat|beats|require|requires|deliver|delivers|show|shows|mean|means|reach|"
+                       r"reaches|exceed|exceeds|double|doubles|halve|halves|cut|cuts|add|adds|lose|loses|lost|"
+                       r"win|wins|won|outperform|outperforms|fail|fails|lack|lacks|depend|depends|stay|stays|"
+                       r"remain|remains|meet|meets|take|takes|keep|keeps|hold|holds|start|starts|end|ends|move|"
+                       r"moves|close|closes|open|opens|lag|lags|lead|leads|run|runs|put|puts|get|gets|give|"
+                       r"gives|make|makes|set|sets|pay|pays|buy|buys|sell|sells|spend|spends|earn|earns|miss|"
+                       r"misses|hit|hits|push|pushes|pull|pulls|slip|slips|drop|drops|jump|jumps|top|tops|"
+                       r"trail|trails|limit|limits|allow|allows|block|blocks|delay|delays|bring|brings|carry|"
+                       r"carries|cover|covers|explain|explains|support|supports|prove|proves|imply|implies|"
+                       r"confirm|confirms|decide|decides|demand|demands|call|calls|rely|relies|commit|commits|"
+                       r"plan|plans|expect|expects|forecast|forecasts|recommend|recommends|propose|proposes|"
+                       r"sit|sits|land|lands|leave|leaves|return|returns|turn|turns|stand|stands|come|comes|"
+                       r"go|goes|see|sees|know|knows|want|wants|look|looks|seem|seems|become|becomes|"
+                       r"only if|unless|because|but|so that|than|while|until|before|after)\b", re.I)
 ZH_VERB_HINT = re.compile(r"(是|为|将|能|应|需|要|可|已|比|超|达|占|降|升|增|减|缺|靠|取决|决定|带来|"
                           r"意味|说明|只有|才|不足|过高|过低|领先|落后|亏|赚|省|卡在|等于|高于|低于)")
+
+
+def is_cover(slide):
+    shapes = [sh for sh in slide.shapes]
+    texty = [sh for sh in shapes if sh.has_text_frame and sh.text_frame.text.strip()]
+    return len(texty) <= 3 and not any(sh.has_table or sh.has_chart for sh in shapes)
 
 
 def titles_pptx(path):
@@ -63,7 +84,8 @@ def titles_pptx(path):
             boxes = [sh for sh in s.shapes if sh.has_text_frame and sh.text_frame.text.strip()]
             boxes.sort(key=lambda sh: (sh.top or 0))
             t = boxes[0].text_frame.text if boxes else ""
-        out.append((f"S{i}", t.strip().replace("\n", " ")))
+        tag = "COV" if i == 1 and is_cover(s) else f"S{i}"
+        out.append((tag, t.strip().replace("\n", " ")))
     return out
 
 
@@ -102,7 +124,8 @@ def flags(title, max_chars):
             f.append("LABEL")
     else:
         words = re.findall(r"[A-Za-z']+", t)
-        if len(words) < 4 or not VERB_HINT.search(t):
+        has_num = bool(re.search(r"\d|待填|待核", t))
+        if len(words) < 4 or (not VERB_HINT.search(t) and not (has_num and len(words) >= 6)):
             f.append("LABEL")
     if len(t) > max_chars:
         f.append("LONG")
@@ -145,11 +168,12 @@ def main():
     bad = 0
     words = slide_words(a.file) if ext == ".pptx" else []
     for i, (tag, t) in enumerate(items):
-        fl = flags(t, a.max_chars)
+        fl = [] if tag == "COV" else flags(t, a.max_chars)
         bad += bool(fl)
         w = f"{words[i]:>4}w " if words else ""
         print(f"{tag:<4} {w}{','.join(fl) or '-':<18} {t}")
-    sentence_share = sum(1 for _, t in items if "LABEL" not in flags(t, a.max_chars)) / max(len(items), 1)
+    scored = [t for tag, t in items if tag != "COV"]
+    sentence_share = sum(1 for t in scored if "LABEL" not in flags(t, a.max_chars)) / max(len(scored), 1)
     print(f"\n{len(items)} titles, {bad} flagged, {sentence_share:.0%} sentence titles "
           f"(top-tier decks: 70% or more).")
     if words:

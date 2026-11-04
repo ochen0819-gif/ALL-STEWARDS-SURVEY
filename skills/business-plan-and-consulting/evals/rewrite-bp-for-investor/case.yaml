@@ -1,0 +1,16 @@
+schema_version: "1.1"
+name: rewrite-bp-for-investor
+expected_outcome: |
+  A Chinese .docx business plan rewritten for a fund partner: opens with the
+  answer (what the company is, the ask, and why now) on page one; every
+  section title is a claim with a number where the topic is size, growth or
+  money; the market size is rebuilt bottom-up with stated assumptions; the
+  use-of-funds table sums to 100 percent and the fix of the 110 percent error
+  in the draft is called out; the financial projection carries its
+  assumptions; the competition section names concrete competitors or marks
+  them as pending; no signpost words, jargon or closing flourish; restrained
+  black-and-white layout with one accent; metadata author is not a tool
+  name; a short chat note lists what was changed and what still needs the
+  author's own numbers.
+context:
+  scaffold_script: place-files.sh

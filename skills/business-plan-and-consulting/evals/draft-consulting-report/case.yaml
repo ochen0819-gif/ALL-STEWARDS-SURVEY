@@ -1,0 +1,13 @@
+schema_version: "1.1"
+name: draft-consulting-report
+expected_outcome: |
+  An English .pptx of at most six slides. Slide one states the answer: L2
+  can finish 3 Nov only if flushing starts 24 Oct on municipal water and
+  PAHU FAT uses option B; otherwise 8 Nov. Every slide title is a full
+  sentence claim; reading the titles alone gives the argument. Dates,
+  owners and sources from the notes are kept (Jason 21 Oct, vendor 22 Oct,
+  312 EPMS points, 88 kW rig limit). A decisions-requested slide names the
+  two decisions, the owner and the date. No agenda, no thank-you slide, no
+  icons, no gradients, one accent colour, source lines at the bottom.
+context:
+  scaffold_script: place-files.sh

@@ -1,0 +1,11 @@
+schema_version: "1.1"
+name: review-pitch-deck-storyline
+expected_outcome: |
+  A chat reply, in Chinese, with no file. It diagnoses the deck as a list of
+  topic labels with no claim, no numbers and the ask buried on the last
+  slide. It returns 12 rewritten titles that are full-sentence claims,
+  reordered so the ask or the one-line thesis appears by slide 2, with
+  numbers where the topic is market, traction or money (marked 待填 where the
+  user gave none, never invented), and a one-page executive summary in
+  answer-first form: the ask, three supporting points, and what has to be
+  true. No signposts, no jargon, no bold keywords, no emoji.

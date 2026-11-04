@@ -143,6 +143,12 @@ def metadata(path):
     return issues
 
 
+# Words that are jargon in management prose but plain terms in an engineering context.
+TECH_CONTEXT = {"颗粒度": re.compile(r"ISO\s*4406|颗粒计数|NAS\s*16|粒径|µm|μm"),
+                "闭环": re.compile(r"控制|回路|PID|反馈控制")}
+CITED = re.compile(r"《[^》]*》|“[^”]*”|\"[^\"]*\"")
+
+
 def scan(text, lang):
     hits = []
     lines = text.splitlines()
@@ -155,7 +161,8 @@ def scan(text, lang):
         groups += [("en-word", [rf"\b{re.escape(w)}\b" for w in EN_WORDS], True),
                    ("en-phrase", [re.escape(p) for p in EN_PHRASES], True)]
     groups += [("trace", [re.escape(t) for t in TRACE], True)]
-    for n, line in enumerate(lines, 1):
+    for n, raw in enumerate(lines, 1):
+        line = CITED.sub("", raw)  # cited titles and quoted phrases are mentions, not usage
         low = line.lower()
         for cat, pats, is_re in groups:
             for p in pats:
@@ -165,14 +172,17 @@ def scan(text, lang):
                     if m:
                         hits.append((cat, m.group(0), n, line.strip()[:120]))
                 elif p in line:
-                    hits.append((cat, p, n, line.strip()[:120]))
+                    ctx = TECH_CONTEXT.get(p)
+                    if ctx and ctx.search(raw):
+                        continue
+                    hits.append((cat, p, n, raw.strip()[:120]))
         if EMOJI_RE.search(line):
             hits.append(("emoji", EMOJI_RE.search(line).group(0), n, line.strip()[:120]))
         if LABEL_COLON_RE.match(line):
             hits.append(("label-colon", LABEL_COLON_RE.match(line).group(0).strip(), n, line.strip()[:120]))
         if BOLD_LABEL_RE.match(line):
             hits.append(("bold-label", "**x**:", n, line.strip()[:120]))
-    dashes = len(DASH_RE.findall(text))
+    dashes = len(DASH_RE.findall(CITED.sub("", text)))
     bold = len(re.findall(r"\*\*[^*]+\*\*", text))
     return hits, {"em_dashes": dashes, "bold_runs": bold, "lines": len(lines)}
 
